@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{--bg:#07070f;--panel:#0d0d1f;--border:#ffffff18;--pink:#ff2d78;--cyan:#00f0ff;--purple:#b94fff;--yellow:#ffe03a;--green:#00ffaa;--orange:#ff8800;--dim:#ffffff55;--text:#f0f0ff;}
+body{background:var(--bg);font-family:'Outfit',sans-serif;color:var(--text);min-height:100vh;overflow-x:hidden;}
+.bg-fx{position:fixed;inset:0;pointer-events:none;z-index:0;}
+.bg-fx::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 70% 50% at 20% 20%,rgba(185,79,255,0.13) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 80%,rgba(255,45,120,0.11) 0%,transparent 60%),radial-gradient(ellipse 50% 60% at 50% 50%,rgba(0,240,255,0.07) 0%,transparent 70%);animation:bgp 6s ease-in-out infinite alternate;}
+@keyframes bgp{from{opacity:.7}to{opacity:1}}
+.bg-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:40px 40px;}
+.wrap{position:relative;z-index:1;max-width:720px;margin:0 auto;padding:14px 14px 40px;}
+.club-logo{font-family:'Bebas Neue',sans-serif;font-size:clamp(34px,8vw,66px);letter-spacing:5px;text-align:center;background:linear-gradient(135deg,var(--pink),var(--purple),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 18px rgba(255,45,120,.5));animation:lg 3s ease-in-out infinite alternate;padding:22px 0 4px;}
+@keyframes lg{from{filter:drop-shadow(0 0 10px rgba(255,45,120,.4))}to{filter:drop-shadow(0 0 26px rgba(0,240,255,.6))}}
+.club-sub{font-size:11px;letter-spacing:8px;color:var(--dim);text-transform:uppercase;text-align:center;margin-bottom:6px;}
+/* sound toggle */
+.sound-bar{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:18px;}
+.sound-toggle{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:20px;padding:6px 16px;cursor:pointer;font-size:12px;font-weight:600;letter-spacing:2px;color:var(--dim);transition:all .2s;display:flex;align-items:center;gap:6px;}
+.sound-toggle.on{border-color:var(--green);color:var(--green);background:rgba(0,255,170,.08);box-shadow:0 0 12px rgba(0,255,170,.2);}
+.vol-hint{font-size:11px;color:var(--dim);letter-spacing:1px;}
+.glass{background:rgba(13,13,31,.88);border:1px solid var(--border);border-radius:20px;padding:20px;margin-bottom:14px;backdrop-filter:blur(12px);position:relative;overflow:hidden;}
+.glass::after{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.15),transparent);}
+.sec-title{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:5px;color:var(--dim);text-transform:uppercase;margin-bottom:13px;}
+.player-row{display:flex;gap:8px;align-items:center;margin-bottom:8px;}
+.pav{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:14px;flex-shrink:0;}
+.ni{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Outfit',sans-serif;font-size:15px;font-weight:600;padding:9px 14px;flex:1;outline:none;letter-spacing:1px;transition:border-color .25s,box-shadow .25s;}
+.ni:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,240,255,.12);}
+.ni::placeholder{color:rgba(255,255,255,.2);font-weight:300;}
+.del-btn{background:none;border:1px solid rgba(255,45,120,.3);color:var(--pink);border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;transition:all .2s;flex-shrink:0;}
+.del-btn:hover{background:rgba(255,45,120,.15);border-color:var(--pink);}
+.add-p{width:100%;padding:10px;background:rgba(255,255,255,.03);border:1px dashed rgba(255,255,255,.12);border-radius:10px;color:var(--dim);font-family:'Outfit',sans-serif;font-size:14px;cursor:pointer;transition:all .2s;letter-spacing:2px;margin-top:4px;}
+.add-p:hover{border-color:var(--purple);color:var(--purple);}
+.chip-row{display:flex;flex-wrap:wrap;gap:8px;}
+.chip{padding:7px 14px;border-radius:30px;border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.4);font-size:11px;font-weight:600;letter-spacing:1.5px;cursor:pointer;transition:all .2s;text-transform:uppercase;background:transparent;user-select:none;}
+.chip:hover{border-color:rgba(255,255,255,.3);color:rgba(255,255,255,.7);}
+.chip.on-p{border-color:var(--pink);color:var(--pink);background:rgba(255,45,120,.12);box-shadow:0 0 10px rgba(255,45,120,.2);}
+.chip.on-c{border-color:var(--cyan);color:var(--cyan);background:rgba(0,240,255,.1);}
+.chip.on-pu{border-color:var(--purple);color:var(--purple);background:rgba(185,79,255,.12);}
+.mode-toggle{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.mode-card{padding:16px;border-radius:14px;border:1px solid var(--border);cursor:pointer;text-align:center;transition:all .25s;background:rgba(255,255,255,.03);}
+.mode-card:hover{border-color:rgba(255,255,255,.25);}
+.mode-card.sel{border-color:var(--cyan);background:rgba(0,240,255,.08);box-shadow:0 0 18px rgba(0,240,255,.15);}
+.mode-icon{font-size:26px;display:block;margin-bottom:6px;}
+.mode-name{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:3px;color:var(--cyan);}
+.mode-desc{font-size:11px;color:var(--dim);margin-top:3px;}
+.btn{font-family:'Outfit',sans-serif;font-weight:700;letter-spacing:2px;font-size:13px;border:none;border-radius:12px;padding:13px 22px;cursor:pointer;transition:all .2s;text-transform:uppercase;}
+.btn:active{transform:scale(.97);}
+.btn-full{width:100%;display:block;margin-top:10px;}
+.btn-start{background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;font-size:15px;padding:16px;box-shadow:0 4px 24px rgba(255,45,120,.4);letter-spacing:3px;}
+.btn-start:hover{box-shadow:0 6px 32px rgba(255,45,120,.6);transform:translateY(-1px);}
+.btn-next{background:linear-gradient(135deg,var(--green),#00c6ff);color:#07070f;font-weight:700;box-shadow:0 4px 20px rgba(0,255,170,.3);}
+.btn-punish{background:linear-gradient(135deg,var(--orange),var(--yellow));color:#07070f;font-weight:700;box-shadow:0 4px 20px rgba(255,136,0,.35);}
+.btn-skip2{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);color:var(--dim);}
+.btn-skip2:hover{border-color:var(--yellow);color:var(--yellow);}
+.btn-sm{font-size:11px;padding:8px 14px;border-radius:8px;}
+.neon-ta{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Outfit',sans-serif;font-size:14px;padding:10px 14px;flex:1;min-width:160px;min-height:56px;outline:none;resize:vertical;transition:border-color .25s;}
+.neon-ta:focus{border-color:var(--purple);}
+.neon-sel{background:rgba(255,255,255,.04);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'Outfit',sans-serif;font-size:13px;padding:9px 12px;outline:none;}
+.cq-list{list-style:none;max-height:140px;overflow-y:auto;}
+.cq-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:13px;color:var(--dim);}
+.cq-badge{font-size:9px;font-weight:700;letter-spacing:2px;padding:3px 8px;border-radius:10px;flex-shrink:0;}
+.cq-t{background:rgba(0,200,255,.15);color:var(--cyan);}
+.cq-d{background:rgba(255,45,120,.15);color:var(--pink);}
+.cq-del{background:none;border:none;color:rgba(255,45,120,.4);cursor:pointer;font-size:16px;margin-left:auto;}
+.cq-del:hover{color:var(--pink);}
+.type-tog{display:flex;border-radius:10px;overflow:hidden;border:1px solid var(--border);flex-shrink:0;}
+.tt-btn{flex:1;padding:9px 12px;background:transparent;border:none;color:var(--dim);font-family:'Outfit',sans-serif;font-size:12px;font-weight:600;letter-spacing:1px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.tt-btn.st{background:rgba(0,200,255,.15);color:var(--cyan);}
+.tt-btn.sd{background:rgba(255,45,120,.15);color:var(--pink);}
+/* wheel */
+.wheel-wrap{display:flex;flex-direction:column;align-items:center;gap:14px;padding:10px 0;}
+.spin-btn{background:linear-gradient(135deg,var(--pink),var(--purple));color:#fff;font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:4px;padding:14px 40px;border:none;border-radius:40px;cursor:pointer;box-shadow:0 4px 24px rgba(255,45,120,.4);transition:all .2s;}
+.spin-btn:hover{transform:translateY(-2px);box-shadow:0 8px 32px rgba(255,45,120,.6);}
+.spin-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;}
+.spin-result{font-family:'Bebas Neue',sans-serif;font-size:clamp(18px,5vw,30px);letter-spacing:4px;text-align:center;min-height:38px;background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+/* game */
+.ppill{padding:6px 14px;border-radius:20px;border:1px solid rgba(255,255,255,.1);font-size:12px;font-weight:600;letter-spacing:1px;color:rgba(255,255,255,.35);transition:all .3s;}
+.ppill.active{border-color:var(--pink);color:var(--text);background:rgba(255,45,120,.15);box-shadow:0 0 14px rgba(255,45,120,.3);animation:ap 2s ease-in-out infinite;}
+@keyframes ap{0%,100%{box-shadow:0 0 10px rgba(255,45,120,.3)}50%{box-shadow:0 0 22px rgba(255,45,120,.6)}}
+.turn-name{font-family:'Bebas Neue',sans-serif;font-size:clamp(28px,7vw,48px);letter-spacing:4px;text-align:center;padding:10px 0 14px;background:linear-gradient(90deg,var(--cyan),var(--purple),var(--pink));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.tod-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:4px;}
+.tod-big{padding:26px 10px;border-radius:16px;font-family:'Bebas Neue',sans-serif;font-size:clamp(20px,5vw,30px);letter-spacing:4px;text-align:center;cursor:pointer;border:none;transition:all .25s;position:relative;overflow:hidden;}
+.tod-big::before{content:'';position:absolute;inset:0;opacity:0;transition:opacity .2s;background:rgba(255,255,255,.1);}
+.tod-big:hover::before{opacity:1;}
+.tod-big:active{transform:scale(.97);}
+.truth-big{background:linear-gradient(135deg,#0a1a3a,#0d2657);border:1px solid rgba(0,200,255,.4);color:var(--cyan);box-shadow:0 0 24px rgba(0,150,255,.2);}
+.dare-big{background:linear-gradient(135deg,#3a0a1a,#570d22);border:1px solid rgba(255,45,120,.4);color:var(--pink);box-shadow:0 0 24px rgba(255,45,120,.2);}
+.tod-icon{font-size:26px;display:block;margin-bottom:5px;}
+.q-card{border-radius:20px;padding:22px;margin-bottom:12px;position:relative;overflow:hidden;animation:ci .35s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes ci{from{transform:translateY(-18px) scale(.95);opacity:0}to{transform:none;opacity:1}}
+.q-card-truth{background:linear-gradient(135deg,rgba(0,50,120,.6),rgba(0,20,60,.8));border:1px solid rgba(0,200,255,.35);box-shadow:0 8px 32px rgba(0,100,255,.15);}
+.q-card-dare{background:linear-gradient(135deg,rgba(120,0,50,.6),rgba(60,0,20,.8));border:1px solid rgba(255,45,120,.35);box-shadow:0 8px 32px rgba(255,0,80,.15);}
+.q-card-punish{background:linear-gradient(135deg,rgba(120,60,0,.6),rgba(80,30,0,.8));border:1px solid rgba(255,136,0,.45);box-shadow:0 8px 32px rgba(255,136,0,.2);animation:ci .35s cubic-bezier(0.34,1.56,0.64,1);}
+.q-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;margin-bottom:10px;}
+.badge-truth{background:rgba(0,200,255,.15);color:var(--cyan);border:1px solid rgba(0,200,255,.3);}
+.badge-dare{background:rgba(255,45,120,.15);color:var(--pink);border:1px solid rgba(255,45,120,.3);}
+.badge-punish{background:rgba(255,136,0,.2);color:var(--orange);border:1px solid rgba(255,136,0,.4);}
+.q-cat{font-size:11px;letter-spacing:4px;color:var(--dim);text-transform:uppercase;margin-bottom:10px;}
+.q-text{font-size:clamp(18px,4vw,24px);font-weight:400;line-height:1.45;color:#fff;letter-spacing:.3px;}
+.action-row{display:flex;gap:8px;flex-wrap:wrap;}
+.action-row .btn{flex:1;min-width:100px;}
+.skip-txt{text-align:center;font-size:12px;color:var(--dim);letter-spacing:2px;margin-top:8px;}
+.round-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;}
+.round-badge{font-size:11px;font-weight:700;letter-spacing:3px;color:var(--green);text-transform:uppercase;}
+.quit-btn{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:var(--dim);font-family:'Outfit',sans-serif;font-size:11px;font-weight:600;letter-spacing:2px;padding:6px 14px;border-radius:8px;cursor:pointer;transition:all .2s;}
+.quit-btn:hover{border-color:var(--pink);color:var(--pink);}
+/* sarcasm toast */
+.sarcast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(30px);background:rgba(10,5,25,.97);border:1px solid var(--orange);border-radius:16px;padding:14px 26px;font-size:17px;font-weight:700;color:var(--orange);letter-spacing:1px;opacity:0;transition:all .4s cubic-bezier(0.34,1.3,0.64,1);pointer-events:none;z-index:9999;text-align:center;backdrop-filter:blur(16px);white-space:nowrap;box-shadow:0 0 30px rgba(255,136,0,.3);}
+.sarcast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.end-screen{text-align:center;padding:20px 0;}
+.end-title{font-family:'Bebas Neue',sans-serif;font-size:clamp(40px,10vw,70px);letter-spacing:6px;background:linear-gradient(135deg,var(--pink),var(--yellow),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:10px;}
+.end-sub{color:var(--dim);letter-spacing:3px;font-size:13px;margin-bottom:24px;}
+.divider{border:none;border-top:1px solid rgba(255,255,255,.06);margin:16px 0;}
+#cc{position:fixed;inset:0;pointer-events:none;z-index:9998;}
+.player-pills{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px;}
+.av0{background:rgba(255,45,120,.2);color:var(--pink);}
+.av1{background:rgba(0,240,255,.15);color:var(--cyan);}
+.av2{background:rgba(185,79,255,.2);color:var(--purple);}
+.av3{background:rgba(255,224,58,.15);color:var(--yellow);}
+.av4{background:rgba(0,255,170,.15);color:var(--green);}
+.av5{background:rgba(255,150,30,.15);color:#ff961e;}
+.av6{background:rgba(200,100,255,.15);color:#c864ff;}
+.av7{background:rgba(100,200,255,.15);color:#64c8ff;}
+</style>
+</head>
+<body>
+<canvas id="cc"></canvas>
+<div class="bg-fx"><div class="bg-grid"></div></div>
+<div class="sarcast" id="sarcast"></div>
+<div class="wrap">
+  <div class="club-logo">TRUTH OR DARE</div>
+  <div class="club-sub">The Party Edition ✦ v3</div>
+  <div class="sound-bar">
+    <button class="sound-toggle" id="sound-toggle" onclick="toggleSound()">🔇 Sound Off — Tap to Enable</button>
+    <span class="vol-hint">🔊 Turn volume up!</span>
+  </div>
+
+  <!-- SETUP -->
+  <div id="s-setup">
+    <div class="glass">
+      <div class="sec-title">Who's Playing Tonight?</div>
+      <div id="pinputs"></div>
+      <button class="add-p" onclick="addPlayer()">+ Add Player</button>
+    </div>
+    <div class="glass">
+      <div class="sec-title">Turn Style</div>
+      <div class="mode-toggle">
+        <div class="mode-card sel" id="mc-default" onclick="setMode('default')">
+          <span class="mode-icon">🎲</span>
+          <div class="mode-name">Random</div>
+          <div class="mode-desc">Instant random pick</div>
+        </div>
+        <div class="mode-card" id="mc-wheel" onclick="setMode('wheel')">
+          <span class="mode-icon">🌀</span>
+          <div class="mode-name">Spin Wheel</div>
+          <div class="mode-desc">Spin to choose player</div>
+        </div>
+      </div>
+    </div>
+    <div class="glass">
+      <div class="sec-title">Content Level</div>
+      <div class="chip-row">
+        <span class="chip on-c" data-c="family" onclick="togC(this,'on-c')">Family</span>
+        <span class="chip" data-c="mild" onclick="togC(this,'on-pu')">Mild 16+</span>
+        <span class="chip" data-c="adult" onclick="togC(this,'on-p')">Adult 18+</span>
+        <span class="chip" data-c="personal" onclick="togC(this,'on-pu')">Personal</span>
+        <span class="chip" data-c="political" onclick="togC(this,'on-c')">Political</span>
+      </div>
+    </div>
+    <div class="glass">
+      <div class="sec-title">Categories</div>
+      <div class="chip-row">
+        <span class="chip on-p" data-cat="gaming" onclick="togCat(this)">🎮 Gaming</span>
+        <span class="chip on-p" data-cat="food" onclick="togCat(this)">🍕 Food</span>
+        <span class="chip on-p" data-cat="education" onclick="togCat(this)">📚 Education</span>
+        <span class="chip on-p" data-cat="travel" onclick="togCat(this)">✈️ Travel</span>
+        <span class="chip on-p" data-cat="relationships" onclick="togCat(this)">💬 Relationships</span>
+        <span class="chip on-p" data-cat="political" onclick="togCat(this)">🗳️ Political</span>
+        <span class="chip on-p" data-cat="fitness" onclick="togCat(this)">💪 Fitness</span>
+        <span class="chip on-p" data-cat="popculture" onclick="togCat(this)">🎬 Pop Culture</span>
+        <span class="chip on-p" data-cat="embarrassing" onclick="togCat(this)">😳 Embarrassing</span>
+        <span class="chip on-p" data-cat="secrets" onclick="togCat(this)">🤫 Secrets</span>
+        <span class="chip on-p" data-cat="hottakes" onclick="togCat(this)">🌶️ Hot Takes</span>
+        <span class="chip on-p" data-cat="wouldyou" onclick="togCat(this)">🤔 Would You Rather</span>
+      </div>
+    </div>
+    <div class="glass">
+      <div class="sec-title">Custom Questions</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:10px;">
+        <textarea class="neon-ta" id="cq-in" placeholder="Type your own truth or dare..."></textarea>
+        <div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0;">
+          <div class="type-tog">
+            <button class="tt-btn st" id="ttb" onclick="setCT('truth')">TRUTH</button>
+            <button class="tt-btn" id="tdb" onclick="setCT('dare')">DARE</button>
+          </div>
+          <select class="neon-sel" id="cq-cat">
+            <option value="gaming">Gaming</option><option value="food">Food</option>
+            <option value="education">Education</option><option value="travel">Travel</option>
+            <option value="relationships">Relationships</option><option value="political">Political</option>
+            <option value="fitness">Fitness</option><option value="popculture">Pop Culture</option>
+            <option value="embarrassing">Embarrassing</option><option value="secrets">Secrets</option>
+            <option value="hottakes">Hot Takes</option><option value="wouldyou">Would You Rather</option>
+          </select>
+          <button class="btn btn-sm" style="background:rgba(185,79,255,.2);border:1px solid rgba(185,79,255,.4);color:var(--purple);font-family:'Outfit',sans-serif;font-weight:700;letter-spacing:2px;" onclick="addCQ()">ADD</button>
+        </div>
+      </div>
+      <ul class="cq-list" id="cq-list"></ul>
+    </div>
+    <button class="btn btn-start btn-full" onclick="startGame()">Let's Go 🎉</button>
+  </div>
+
+  <!-- WHEEL -->
+  <div id="s-wheel" style="display:none;">
+    <div class="glass">
+      <div class="round-row">
+        <span class="round-badge" id="w-round-lbl">Round 1</span>
+        <button class="quit-btn" onclick="endGame()">End Night</button>
+      </div>
+      <div class="wheel-wrap">
+        <canvas id="wcanvas" width="300" height="300"></canvas>
+        <div class="spin-result" id="spin-result">Spin to pick a player!</div>
+        <button class="spin-btn" id="spin-btn" onclick="spinWheel()">SPIN 🌀</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME -->
+  <div id="s-game" style="display:none;">
+    <div class="glass">
+      <div class="round-row">
+        <span class="round-badge" id="round-lbl">Round 1</span>
+        <button class="quit-btn" onclick="endGame()">End Night</button>
+      </div>
+      <div class="player-pills" id="ppills"></div>
+      <div class="turn-name" id="turn-name">PLAYER</div>
+      <div class="tod-row" id="tod-row">
+        <button class="tod-big truth-big" onclick="pick('truth')"><span class="tod-icon">🤔</span>TRUTH</button>
+        <button class="tod-big dare-big" onclick="pick('dare')"><span class="tod-icon">🔥</span>DARE</button>
+      </div>
+      <div id="card-area"></div>
+      <div class="skip-txt" id="skip-txt"></div>
+    </div>
+  </div>
+
+  <!-- END -->
+  <div id="s-end" style="display:none;">
+    <div class="glass end-screen">
+      <div class="end-title">That's a Wrap!</div>
+      <div class="end-sub">Hope no secrets survived tonight 👀</div>
+      <button class="btn btn-start" onclick="resetAll()">Play Again 🎉</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== WEB AUDIO ENGINE ===== */
+let actx = null;
+let soundOn = false;
+
+function getCtx() {
+  if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+  if (actx.state === 'suspended') actx.resume();
+  return actx;
+}
+
+function toggleSound() {
+  soundOn = !soundOn;
+  const btn = document.getElementById('sound-toggle');
+  if (soundOn) {
+    getCtx();
+    btn.textContent = '🔊 Sound On';
+    btn.classList.add('on');
+    playChime();
+  } else {
+    btn.textContent = '🔇 Sound Off — Tap to Enable';
+    btn.classList.remove('on');
+  }
+}
+
+// Smooth beep helper
+function beep(freq, type, start, dur, vol, ctx, dest) {
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.type = type;
+  o.frequency.setValueAtTime(freq, start);
+  g.gain.setValueAtTime(0, start);
+  g.gain.linearRampToValueAtTime(vol, start + 0.01);
+  g.gain.exponentialRampToValueAtTime(0.001, start + dur);
+  o.connect(g); g.connect(dest);
+  o.start(start); o.stop(start + dur);
+}
+
+// 🎵 Cheerful chime — sound ON confirm
+function playChime() {
+  if (!soundOn) return;
+  const ctx = getCtx(), t = ctx.currentTime;
+  [523, 659, 784, 1047].forEach((f, i) => beep(f, 'sine', t + i * 0.1, 0.3, 0.3, ctx, ctx.destination));
+}
+
+// 🎉 Winner fanfare — next player / done
+function playWin() {
+  if (!soundOn) return;
+  const ctx = getCtx(), t = ctx.currentTime, d = ctx.destination;
+  [392, 523, 659, 784, 1047].forEach((f, i) => beep(f, 'sine', t + i * 0.08, 0.25, 0.25, ctx, d));
+  beep(1047, 'sine', t + 0.4, 0.5, 0.2, ctx, d);
+}
+
+// 🌀 Spin tick — wheel spinning
+function playTick() {
+  if (!soundOn) return;
+  const ctx = getCtx(), t = ctx.currentTime;
+  beep(800, 'square', t, 0.04, 0.15, ctx, ctx.destination);
+}
+
+// 💀 Loser buzz — punishment triggered
+function playLoser() {
+  if (!soundOn) return;
+  const ctx = getCtx(), t = ctx.currentTime, d = ctx.destination;
+  // Descending "wah wah wah" trombone
+  const o = ctx.createOscillator();
+  const g = ctx.createGain();
+  o.type = 'sawtooth';
+  o.frequency.setValueAtTime(300, t);
+  o.frequency.linearRampToValueAtTime(200, t + 0.25);
+  o.frequency.setValueAtTime(280, t + 0.3);
+  o.frequency.linearRampToValueAtTime(180, t + 0.55);
+  o.frequency.setValueAtTime(260, t + 0.6);
+  o.frequency.linearRampToValueAtTime(150, t + 0.9);
+  g.gain.setValueAtTime(0, t);
+  g.gain.linearRampToValueAtTime(0.35, t + 0.02);
+  g.gain.setValueAtTime(0.35, t + 0.22);
+  g.gain.linearRampToValueAtTime(0, t + 0.28);
+  g.gain.linearRampToValueAtTime(0.3, t + 0.32);
+  g.gain.linearRampToValueAtTime(0, t + 0.58);
+  g.gain.linearRampToValueAtTime(0.25, t + 0.62);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.95);
+  o.connect(g); g.connect(d);
+  o.start(t); o.stop(t + 1);
+  // Low drum thud
+  const n = ctx.createOscillator(), ng = ctx.createGain();
+  n.type = 'sine'; n.frequency.setValueAtTime(80, t); n.frequency.exponentialRampToValueAtTime(30, t + 0.3);
+  ng.gain.setValueAtTime(0.5, t); ng.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+  n.connect(ng); ng.connect(d); n.start(t); n.stop(t + 0.4);
+}
+
+// ❓ Card flip whoosh
+function playFlip() {
+  if (!soundOn) return;
+  const ctx = getCtx(), t = ctx.currentTime, d = ctx.destination;
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.type = 'sine';
+  o.frequency.setValueAtTime(200, t);
+  o.frequency.exponentialRampToValueAtTime(800, t + 0.15);
+  g.gain.setValueAtTime(0.2, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+  o.connect(g); g.connect(d); o.start(t); o.stop(t + 0.25);
+}
+
+// 🔔 Truth chime — gentle ascending
+function playTruth() {
+  if (!soundOn) return;
+  const ctx = getCtx(), t = ctx.currentTime, d = ctx.destination;
+  [440, 550, 660].forEach((f, i) => beep(f, 'sine', t + i * 0.1, 0.35, 0.2, ctx, d));
+}
+
+// 🔥 Dare buzz — edgy
+function playDare() {
+  if (!soundOn) return;
+  const ctx = getCtx(), t = ctx.currentTime, d = ctx.destination;
+  beep(150, 'sawtooth', t, 0.08, 0.3, ctx, d);
+  beep(200, 'sawtooth', t + 0.1, 0.08, 0.3, ctx, d);
+  beep(250, 'square', t + 0.2, 0.15, 0.25, ctx, d);
+  beep(400, 'sine', t + 0.32, 0.2, 0.2, ctx, d);
+}
+
+/* ===== GAME DATA ===== */
+const QDB={gaming:{family:{truth:["What's your all-time favourite video game?","Have you ever rage-quit? Which game pushed you over the edge?","What game character would you be for a day?","Longest gaming session you've ever had?","Solo or multiplayer — which would you choose forever?"],dare:["Do your best video game character impression","Describe a game using only animal sounds","Act out an entire boss fight using only your hands","Teach someone a move with full over-the-top sound effects","Narrate this room like a game tutorial"]},mild:{truth:["Ever cheated in an online game?","Most embarrassing game you secretly love?","How much have you actually spent on in-game purchases?"],dare:["Convince everyone a terrible game is secretly a masterpiece","Narrate someone eating their snack like live game commentary"]},adult:{truth:["Ever flirted with someone in an online game?","Most toxic thing you've ever done in a game — be honest."],dare:["Do a victory dance after an imaginary win — make it dramatic"]}},food:{family:{truth:["Weirdest food combo you actually enjoy?","One food you could eat every single day and never get bored?","Ever pretended to like food you secretly hated to be polite?","Most exotic food you've ever tried?","A food you thought you hated but ended up loving?"],dare:["Describe your favourite meal as dramatically as possible","Eat something in the room using only your non-dominant hand","Make every sound of your favourite food being cooked","Convince everyone that a gross food combo is actually delicious"]},mild:{truth:["Ever eaten food off the floor and not told anyone?","Most you've ever spent on a single meal?","Have you lied to someone's face about liking their cooking?"],dare:["Eat any snack in the room as if it were the world's finest cuisine"]},adult:{truth:["Worst food date you've ever been on?","A food you strongly associate with a romantic memory?"],dare:["Describe preparing a meal in your most seductive voice possible"]}},education:{family:{truth:["Subject you secretly hated in school but pretended to like?","Ever cheat on a test and completely get away with it?","Most memorable teacher you ever had — what made them special?","A skill you wish you had learned way earlier in life?","Something you self-taught that school completely failed to cover?"],dare:["Explain quantum physics to the group using only hand gestures","Share one genuinely surprising fun fact with everyone right now","Speak like a pompous professor for the next full 2 minutes","Draw the solar system from memory in under 30 seconds"]},mild:{truth:["Biggest lie you ever told a teacher?","Did you ever skip class and get caught?"],dare:["Give a dramatic TED talk about something completely trivial"]},adult:{truth:["Did you ever have a crush on a teacher?","Most scandalous thing you ever did in school or college?"],dare:["Re-enact a university lecture in the most hilariously exaggerated way possible"]}},travel:{family:{truth:["Most beautiful place you've ever visited?","Top destination on your travel bucket list right now?","Have you ever gotten completely lost while travelling?","A travel experience that genuinely changed your perspective on life?","Beach forever or mountains forever — which one?"],dare:["Tour-guide this exact room as if it's a world-famous landmark","Pack an imaginary suitcase in 30 seconds while narrating everything","Speak in an accent from a country you've actually been to","Act out going through airport security in extreme slow motion"]},mild:{truth:["Most embarrassing travel mishap you've ever had?","Have you accidentally broken a local law while travelling?"],dare:["Demonstrate the most catastrophically chaotic travel day using only gestures"]},adult:{truth:["Ever had a holiday romance? What happened?","Most daring thing you've ever done while away from home?"],dare:["Check into an imaginary hotel room in the most theatrical way possible"]}},relationships:{family:{truth:["Quality you value most in a best friend?","Have you ever kept a major secret from someone really close to you?","Kindest thing a friend has ever done for you?","Do you believe in love at first sight — honestly?","Most important lesson a relationship has ever taught you?"],dare:["Write a poem about the person to your left and read it aloud","Give each person in the group a completely genuine compliment","Act out asking someone for a huge favour in the most over-the-top way"]},mild:{truth:["Gone back to an ex before — would you do it again?","Pettiest reason you've ever ended or avoided a friendship?","Ever had feelings for a close friend's partner?"],dare:["Deliver a full dramatic breakup monologue to an object in the room"]},adult:{truth:["Most embarrassing relationship memory you have?","Ever developed feelings for someone you absolutely should not have?","Describe your ideal romantic evening — no filters."],dare:["Write a flirty text to an imaginary crush and read it aloud with full commitment"]},personal:{truth:["Something about yourself you've never told anyone in this group?","Your single biggest personal insecurity right now?","When did you last cry and what caused it?"],dare:["Show everyone the last photo on your camera roll"]}},political:{family:{truth:["One law you'd change if you could do it tomorrow?","Should voting be mandatory — why or why not?","What world problem do you care most passionately about?"],dare:["Give a full 30-second campaign speech for a completely ridiculous political party"]},mild:{truth:["A political opinion you hold that tends to surprise people?","Ever argued about politics and later seriously regretted it?"],dare:["Debate both sides of a genuinely controversial topic convincingly in 60 seconds"]},adult:{truth:["A political stance you hold privately but rarely share out loud?","Have you ever lost a real friendship over a political disagreement?"],dare:["Deliver an impassioned political speech about something completely and utterly absurd"]}},fitness:{family:{truth:["A sport or activity you'd genuinely love to master?","Alone or group workouts — which do you prefer and why?","Most physically challenging thing you've ever done in your life?","Have you ever set a real fitness goal and actually achieved it?"],dare:["Do 10 jumping jacks right now — no excuses!","Lead the entire group through a 30-second workout","Show your best yoga pose and hold it for the group","Perform your most dramatic slow-motion sports victory"]},mild:{truth:["Ever faked an injury to get out of PE or the gym?","One unhealthy habit you really struggle to break?"],dare:["Do a wildly dramatic victory lap around the entire room"]},adult:{truth:["Ever used fitness as a reason to spend time around someone you were attracted to?","Most embarrassing thing that has ever happened to you at a gym?"],dare:["Demonstrate an absolutely absurd over-the-top personal training session on someone"]}},popculture:{family:{truth:["A movie you could quote endlessly without getting tired?","Fictional character you relate to the most and why?","Song you secretly blast at full volume when completely alone?","Show you've binge-watched an entire season of in one sitting?","Celebrity you'd most want to spend one full day with?"],dare:["Perform your best movie villain monologue from memory right now","Lip-sync a song of the group's choosing for 30 full seconds","Act out your favourite movie scene using absolutely no words","Impersonate a famous character until someone in the group correctly guesses"]},mild:{truth:["Your guiltiest pleasure TV show right now?","Biggest celebrity crush you've ever had — who was it?"],dare:["Do a dramatic live reading of the most ridiculous celebrity headline you can think of"]},adult:{truth:["Celebrity you find most attractive right now and exactly why?","Most risqué fan fiction scenario you've ever imagined?"],dare:["Do a full over-the-top impression of a celebrity in a cheesy romantic film scene"]}},embarrassing:{family:{truth:["Most embarrassing thing you've ever done in public?","A cringe nickname you've had — what's the origin story?","Most awkward first impression you've ever made on someone?","Most embarrassing phase you went through growing up?","Most cringe text or message you've ever accidentally sent?"],dare:["Re-enact your most embarrassing moment in full vivid detail","Walk around the room as your most embarrassing self","Read the most embarrassing thing in your notes app out loud","Do your most embarrassing impression of yourself from 5 years ago"]},mild:{truth:["Most embarrassing thing you've ever been caught doing?","Ever walked into the wrong bathroom? Tell us the full story.","Most embarrassing autocorrect fail you've ever had?"],dare:["Recreate your absolute most embarrassing school photo pose"]},adult:{truth:["Most embarrassing moment with someone you had a crush on?","Most awkward morning-after situation you've ever been in?"],dare:["Describe your most embarrassing date in full detail to the entire group"]}},secrets:{family:{truth:["Something you've never admitted to your parents?","A secret talent that almost nobody in your life knows about?","A childhood secret you've somehow kept until right now?","Something you always pretend to like but secretly hate?","A goal you've been too scared to tell a single person about?"],dare:["Tell the group one surprising thing about yourself they'd never guess","Write a secret on paper and let the person to your right read it","Whisper your biggest unpopular opinion to the group one by one"]},mild:{truth:["Something you've done that would genuinely shock everyone here?","A habit you've successfully hidden from everyone close to you?","A lie you told once that snowballed completely out of control?"],dare:["Tell the group one secret they would absolutely never guess about you"]},adult:{truth:["A secret attraction you've had but never acted on?","Something you've done that you've never confessed to anyone?","A secret you've kept from a partner or very close friend?"],dare:["Write your biggest secret anonymously and have someone else read it aloud"]}},hottakes:{family:{truth:["Most unpopular food opinion you genuinely hold?","An overrated movie or show that everyone loves but you?","Your most controversial opinion about a popular current trend?","A hill you would absolutely, completely die on?","Something you genuinely believe that most people disagree with?"],dare:["Passionately defend a completely wild unpopular opinion for a full minute","Argue that pineapple belongs on pizza with total conviction","Pick the most divisive side on any topic the group names"]},mild:{truth:["Your spiciest hot take about social media?","Most overrated celebrity that everyone else seems to love?","Spiciest honest opinion you have about modern dating?"],dare:["Absolutely roast a popular trend you secretly cannot stand"]},adult:{truth:["Most controversial relationship hot take you quietly hold?","Spiciest opinion you have about someone in this room — be careful!","Honest hot take about adult life that you think is true but won't say?"],dare:["Share your single hottest take and defend it under full group cross-examination"]}},wouldyou:{family:{truth:["Would you rather be invisible or be able to fly?","Would you rather always speak the truth or always have to lie?","Would you rather live permanently in the past or the future?","Would you rather lose your phone or your wallet — forever?","Would you rather be world-famous or quietly extremely rich?"],dare:["Act out both sides of a 'would you rather' the group invents for you","Make up the most impossible 'would you rather' and refuse to answer it","Demonstrate with full actions which option you'd actually choose and explain why"]},mild:{truth:["Would you rather know exactly how you die or exactly when you die?","Would you rather single-handedly end all wars or end world hunger?","Would you rather always be overdressed or always be underdressed?"],dare:["Let the group give you a 'would you rather' and react as dramatically as possible"]},adult:{truth:["Would you rather your partner see your full search history or all your texts?","Would you rather never have a serious relationship or never have casual fun?","Would you rather always know exactly what people think of you or never know?"],dare:["Live-action roleplay the most dramatic 'would you rather' scenario the group can invent"]}}};
+
+const PUNISHMENTS=[
+  {text:"Do 15 push-ups right now. The group counts. No mercy.",cat:"💪 Physical"},
+  {text:"Sprint in place at absolute full speed for 30 seconds.",cat:"💪 Physical"},
+  {text:"Hold a squat position for 45 seconds. Group watches.",cat:"💪 Physical"},
+  {text:"Do 20 jumping jacks while the group counts loudly.",cat:"💪 Physical"},
+  {text:"Hold a plank for 30 seconds. Group will judge your form harshly.",cat:"💪 Physical"},
+  {text:"Draw a portrait of the person to your right in 60 seconds. Show everyone.",cat:"✏️ Drawing"},
+  {text:"Write everyone's name in this room with your non-dominant hand.",cat:"✏️ Writing"},
+  {text:"Write a 3-line poem about your own punishment and read it dramatically.",cat:"✏️ Writing"},
+  {text:"Draw your spirit animal in 30 seconds. The group decides what it actually looks like.",cat:"✏️ Drawing"},
+  {text:"Text someone outside this group a completely random sentence the group chooses.",cat:"📱 Social"},
+  {text:"Do your best impression of the person to your left for 30 uninterrupted seconds.",cat:"🎭 Social"},
+  {text:"Speak in an accent chosen by the group for your next 2 turns.",cat:"🎭 Social"},
+  {text:"Compliment every single person in the room with full genuine sincerity.",cat:"🎭 Social"},
+  {text:"Let the group style your hair however they want for the next 5 minutes.",cat:"🎭 Social"},
+  {text:"Eat something from the kitchen in a combination the group picks for you.",cat:"🌶️ Food"},
+  {text:"Eat any snack with absolutely no hands — face-first on the table.",cat:"🌶️ Food"},
+  {text:"Sing everything you want to say for the next 3 full minutes. No talking.",cat:"🎭 Social"},
+  {text:"Let the group change your phone wallpaper for the rest of the game.",cat:"📱 Social"},
+  {text:"Do a full 1-minute stand-up comedy set about your own life. Go.",cat:"🎭 Social"},
+  {text:"Call someone right now and say 'I need to confess something' then hang up.",cat:"📱 Social"},
+];
+
+const SARCASM=[
+  "💀 Shit... here we go again","😂 Bruhhhhhhhh","🤦 Ahh loooser","😬 Wow. Just... wow.",
+  "🙄 Classic. Absolutely classic.","💀 This is so embarrassing omg","😩 Nooooo why though??",
+  "🤣 Can't make this up fr fr","😤 The audacity tho??","💅 Punishment arc loading...",
+  "🚨 LOSER ALERT 🚨","😭 This is your villain origin story","🫵 The group has spoken. Accept your fate.",
+  "🎺 Sad trombone plays in the background","😮‍💨 Yikes. Big yikes.","👑 Coward of the year award",
+  "💀 Not even surprised anymore lmaooo","🫠 This is genuinely so embarrassing","😈 Karma is coming",
+];
+
+let players=[],customQs=[],selContent=new Set(['family']),
+    selCats=new Set(['gaming','food','education','travel','relationships','political','fitness','popculture','embarrassing','secrets','hottakes','wouldyou']),
+    ctType='truth',curIdx=0,round=1,skips={},usedIds=new Set(),gameMode='default';
+let wheelAngle=0,wheelSpinning=false,lastTick=0;
+const avCls=['av0','av1','av2','av3','av4','av5','av6','av7'];
+const neonCols=['#ff2d78','#00f0ff','#b94fff','#ffe03a','#00ffaa','#ff8800','#c864ff','#64c8ff'];
+const ini=n=>n.trim().slice(0,2).toUpperCase()||'?';
+
+function initSetup(){players=[];addPlayer();addPlayer();}
+function addPlayer(){if(players.length>=8)return;players.push('');renderInputs();}
+function removePlayer(i){if(players.length<=2)return;players.splice(i,1);renderInputs();}
+function renderInputs(){
+  document.getElementById('pinputs').innerHTML=players.map((p,i)=>`
+    <div class="player-row">
+      <div class="pav ${avCls[i%avCls.length]}">${ini(p||'P'+(i+1))}</div>
+      <input class="ni" maxlength="14" placeholder="Player ${i+1}" value="${p}"
+        oninput="players[${i}]=this.value;document.querySelectorAll('.pav')[${i}].textContent=ini(this.value||'P${i+1}')" style="text-transform:uppercase">
+      ${players.length>2?`<button class="del-btn" onclick="removePlayer(${i})">✕</button>`:''}
+    </div>`).join('');
+}
+function setMode(m){
+  gameMode=m;
+  document.getElementById('mc-default').className='mode-card'+(m==='default'?' sel':'');
+  document.getElementById('mc-wheel').className='mode-card'+(m==='wheel'?' sel':'');
+}
+function togC(el,cls){
+  const v=el.dataset.c;
+  if(selContent.has(v)){if(selContent.size===1)return;selContent.delete(v);el.className='chip';}
+  else{selContent.add(v);el.className='chip '+cls;}
+}
+function togCat(el){
+  const v=el.dataset.cat;
+  if(selCats.has(v)){if(selCats.size===1)return;selCats.delete(v);el.className='chip';}
+  else{selCats.add(v);el.className='chip on-p';}
+}
+function setCT(t){
+  ctType=t;
+  document.getElementById('ttb').className='tt-btn'+(t==='truth'?' st':'');
+  document.getElementById('tdb').className='tt-btn'+(t==='dare'?' sd':'');
+}
+function addCQ(){
+  const txt=document.getElementById('cq-in').value.trim();if(!txt)return;
+  customQs.push({text:txt,type:ctType,cat:document.getElementById('cq-cat').value});
+  document.getElementById('cq-in').value='';renderCQList();
+}
+function removeCQ(i){customQs.splice(i,1);renderCQList();}
+function renderCQList(){
+  document.getElementById('cq-list').innerHTML=customQs.map((q,i)=>`
+    <li class="cq-item">
+      <span class="cq-badge ${q.type==='truth'?'cq-t':'cq-d'}">${q.type.toUpperCase()}</span>
+      <span style="flex:1">${q.text}</span>
+      <button class="cq-del" onclick="removeCQ(${i})">✕</button>
+    </li>`).join('');
+}
+
+function startGame(){
+  players=players.map((p,i)=>(p.trim().toUpperCase()||`P${i+1}`));
+  if(players.length<2){alert('Add at least 2 players!');return;}
+  skips={};players.forEach(p=>skips[p]=2);
+  curIdx=0;round=1;usedIds=new Set();
+  document.getElementById('s-setup').style.display='none';
+  gameMode==='wheel'?showWheel():showTurn();
+}
+
+/* WHEEL */
+function showWheel(){
+  document.getElementById('s-wheel').style.display='block';
+  document.getElementById('s-game').style.display='none';
+  document.getElementById('w-round-lbl').textContent=`Round ${round}`;
+  document.getElementById('spin-result').textContent='Spin to pick a player!';
+  document.getElementById('spin-btn').disabled=false;
+  drawWheel(wheelAngle);
+}
+function drawWheel(angle){
+  const cv=document.getElementById('wcanvas'),cx=cv.getContext('2d');
+  const sz=Math.min(300,window.innerWidth-60);
+  cv.width=sz;cv.height=sz;
+  const R=sz/2-6,cx2=sz/2,cy2=sz/2,n=players.length,arc=2*Math.PI/n;
+  cx.clearRect(0,0,sz,sz);
+  cx.save();cx.shadowBlur=24;cx.shadowColor='rgba(185,79,255,0.5)';
+  cx.beginPath();cx.arc(cx2,cy2,R+4,0,2*Math.PI);cx.strokeStyle='rgba(185,79,255,0.3)';cx.lineWidth=3;cx.stroke();cx.restore();
+  players.forEach((p,i)=>{
+    const s=angle+i*arc,e=s+arc;
+    cx.beginPath();cx.moveTo(cx2,cy2);cx.arc(cx2,cy2,R,s,e);cx.closePath();
+    cx.fillStyle=neonCols[i%neonCols.length]+'22';cx.fill();
+    cx.strokeStyle=neonCols[i%neonCols.length];cx.lineWidth=2;cx.stroke();
+    const mid=s+arc/2,tx=cx2+Math.cos(mid)*(R*0.65),ty=cy2+Math.sin(mid)*(R*0.65);
+    cx.save();cx.translate(tx,ty);cx.rotate(mid+Math.PI/2);
+    cx.fillStyle=neonCols[i%neonCols.length];
+    cx.font=`bold ${Math.max(11,sz/players.length/3)}px Outfit`;
+    cx.textAlign='center';cx.textBaseline='middle';
+    cx.shadowBlur=8;cx.shadowColor=neonCols[i%neonCols.length];
+    cx.fillText(p.slice(0,8),0,0);cx.restore();
+  });
+  cx.beginPath();cx.arc(cx2,cy2,20,0,2*Math.PI);cx.fillStyle='#0d0d1f';cx.fill();cx.strokeStyle='#b94fff';cx.lineWidth=2;cx.stroke();
+  cx.beginPath();cx.moveTo(cx2,4);cx.lineTo(cx2-10,22);cx.lineTo(cx2+10,22);cx.closePath();
+  cx.fillStyle='#ffe03a';cx.shadowBlur=12;cx.shadowColor='#ffe03a';cx.fill();
+}
+function spinWheel(){
+  if(wheelSpinning)return;
+  wheelSpinning=true;
+  document.getElementById('spin-btn').disabled=true;
+  document.getElementById('spin-result').textContent='Spinning...';
+  const extra=Math.PI*2*(5+Math.random()*6);
+  const from=wheelAngle,dur=3200+Math.random()*1400,start=performance.now();
+  let prevSeg=-1;
+  function frame(now){
+    const t=Math.min(1,(now-start)/dur),ease=1-Math.pow(1-t,4);
+    wheelAngle=from+extra*ease;
+    // tick sound on segment change
+    const n=players.length,arc=2*Math.PI/n;
+    const norm=((Math.PI*2.5-wheelAngle)%(Math.PI*2)+Math.PI*2)%(Math.PI*2);
+    const seg=Math.floor(norm/arc)%n;
+    if(seg!==prevSeg){playTick();prevSeg=seg;}
+    drawWheel(wheelAngle);
+    if(t<1){requestAnimationFrame(frame);}
+    else{
+      wheelAngle=wheelAngle%(Math.PI*2);
+      const norm2=((Math.PI*2.5-wheelAngle)%(Math.PI*2)+Math.PI*2)%(Math.PI*2);
+      curIdx=Math.floor(norm2/arc)%n;
+      document.getElementById('spin-result').textContent=`🎉 ${players[curIdx]}!`;
+      playWin();
+      wheelSpinning=false;
+      setTimeout(()=>{document.getElementById('s-wheel').style.display='none';showTurn();},1300);
+    }
+  }
+  requestAnimationFrame(frame);
+}
+
+function showTurn(){
+  document.getElementById('s-game').style.display='block';
+  document.getElementById('round-lbl').textContent=`Round ${round}`;
+  document.getElementById('ppills').innerHTML=players.map((p,i)=>`<span class="ppill ${i===curIdx?'active':''}">${p}</span>`).join('');
+  document.getElementById('turn-name').textContent=players[curIdx];
+  document.getElementById('tod-row').style.display='grid';
+  document.getElementById('card-area').innerHTML='';
+  document.getElementById('skip-txt').textContent=`Skips left: ${skips[players[curIdx]]}`;
+}
+
+function buildPool(type){
+  let pool=[];
+  selCats.forEach(cat=>{
+    if(!QDB[cat])return;
+    selContent.forEach(content=>{
+      const lvl={family:'family',mild:'mild',adult:'adult',personal:'personal',political:'mild'}[content]||content;
+      if(QDB[cat][lvl]&&QDB[cat][lvl][type]){
+        QDB[cat][lvl][type].forEach((q,i)=>{
+          const id=`${cat}-${lvl}-${type}-${i}`;
+          if(!usedIds.has(id))pool.push({text:q,cat:cat.toUpperCase().replace('WOULDYOU','WOULD YOU RATHER').replace('HOTTAKES','HOT TAKES'),id});
+        });
+      }
+    });
+  });
+  customQs.filter(q=>q.type===type).forEach((q,i)=>{
+    const id=`cq-${type}-${i}`;
+    if(!usedIds.has(id))pool.push({text:q.text,cat:q.cat.toUpperCase(),id});
+  });
+  return pool;
+}
+
+function pick(type){
+  if(type==='truth')playTruth();else playDare();
+  let pool=buildPool(type);
+  if(!pool.length){usedIds=new Set();pool=buildPool(type);}
+  if(!pool.length){document.getElementById('card-area').innerHTML='<p style="color:var(--dim);text-align:center;padding:20px;letter-spacing:2px;font-size:13px;">No questions match! Enable more categories.</p>';return;}
+  const q=pool[Math.floor(Math.random()*pool.length)];
+  usedIds.add(q.id);
+  const it=type==='truth';
+  document.getElementById('tod-row').style.display='none';
+  setTimeout(()=>{playFlip();},150);
+  document.getElementById('card-area').innerHTML=`
+    <div class="q-card q-card-${type}">
+      <span class="q-badge ${it?'badge-truth':'badge-dare'}">${type.toUpperCase()}</span>
+      <div class="q-cat">${q.cat}</div>
+      <div class="q-text">${q.text}</div>
+    </div>
+    <div class="action-row">
+      <button class="btn btn-next" onclick="nextPlayer()">Done ✓</button>
+      <button class="btn btn-punish" onclick="showPunishment()">😈 Refused!</button>
+      <button class="btn btn-skip2" onclick="doSkip('${type}')">Skip (${skips[players[curIdx]]})</button>
+    </div>`;
+  document.getElementById('skip-txt').textContent='';
+}
+
+function showPunishment(){
+  playLoser();
+  const msg=SARCASM[Math.floor(Math.random()*SARCASM.length)];
+  const t=document.getElementById('sarcast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3200);
+  const p=PUNISHMENTS[Math.floor(Math.random()*PUNISHMENTS.length)];
+  document.getElementById('card-area').innerHTML=`
+    <div class="q-card q-card-punish">
+      <span class="q-badge badge-punish">😈 PUNISHMENT</span>
+      <div class="q-cat">${p.cat}</div>
+      <div class="q-text">${p.text}</div>
+    </div>
+    <div class="action-row">
+      <button class="btn btn-next" onclick="nextPlayer()">Done & Next ✓</button>
+      <button class="btn btn-punish" onclick="showPunishment()">Different One 🎲</button>
+    </div>`;
+}
+
+function doSkip(type){
+  const p=players[curIdx];
+  if(skips[p]<=0){document.getElementById('skip-txt').textContent='No skips left! Face it or get punished 😈';return;}
+  skips[p]--;pick(type);
+}
+
+function nextPlayer(){
+  playWin();confetti();
+  curIdx++;
+  if(curIdx>=players.length){curIdx=0;round++;}
+  gameMode==='wheel'?showWheel():showTurn();
+}
+
+function endGame(){
+  document.getElementById('s-wheel').style.display='none';
+  document.getElementById('s-game').style.display='none';
+  document.getElementById('s-end').style.display='block';
+  confetti();playWin();
+}
+function resetAll(){
+  document.getElementById('s-end').style.display='none';
+  document.getElementById('s-setup').style.display='block';
+  initSetup();
+}
+
+function confetti(){
+  const cv=document.getElementById('cc'),cx=cv.getContext('2d');
+  cv.width=window.innerWidth;cv.height=window.innerHeight;
+  const cols=['#ff2d78','#00f0ff','#b94fff','#ffe03a','#00ffaa','#ff8800'];
+  const pts=Array.from({length:90},()=>({x:Math.random()*cv.width,y:-16,vx:(Math.random()-.5)*5,vy:Math.random()*4+2,w:Math.random()*10+4,h:Math.random()*5+3,col:cols[Math.floor(Math.random()*cols.length)],rot:Math.random()*360,rv:(Math.random()-.5)*12,life:1}));
+  let f=0;
+  (function draw(){
+    cx.clearRect(0,0,cv.width,cv.height);
+    pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.rot+=p.rv;p.life-=0.01;cx.save();cx.globalAlpha=Math.max(0,p.life);cx.translate(p.x,p.y);cx.rotate(p.rot*Math.PI/180);cx.fillStyle=p.col;cx.fillRect(-p.w/2,-p.h/2,p.w,p.h);cx.restore();});
+    if(++f<160)requestAnimationFrame(draw);else cx.clearRect(0,0,cv.width,cv.height);
+  })();
+}
+
+initSetup();
+</script>
+</body>
+</html>
